@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useBuyerProfile } from "@/hooks/useBuyerProfile";
@@ -10,16 +9,18 @@ import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 // Add a static role list in case of future roles
-const ROLE_OPTIONS = [
-  { label: "Buyer", value: "buyer" }
+const ROLE_OPTIONS: { label: string; value: "buyer" | "farmer" }[] = [
+  { label: "Buyer", value: "buyer" },
+  // Extend with roles in the future:
+  // { label: "Farmer", value: "farmer" }
 ];
 
 const Dashboard = () => {
   const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile();
   const { data: buyerProfile, isLoading: buyerLoading } = useBuyerProfile();
   const [open, setOpen] = useState(false);
-  const [selectingRole, setSelectingRole] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("buyer");
+  // Explicitly type as the allowed enum (matches Supabase type)
+  const [selectedRole, setSelectedRole] = useState<"buyer" | "farmer">("buyer");
   const [roleUpdating, setRoleUpdating] = useState(false);
 
   // Debug logs to help diagnose dashboard rendering issues
@@ -48,7 +49,8 @@ const Dashboard = () => {
             <select
               className="border rounded px-3 py-2 w-full"
               value={selectedRole}
-              onChange={e => setSelectedRole(e.target.value)}
+              // onChange now infers correct type
+              onChange={e => setSelectedRole(e.target.value as "buyer" | "farmer")}
               disabled={roleUpdating}
             >
               {ROLE_OPTIONS.map(opt => (
