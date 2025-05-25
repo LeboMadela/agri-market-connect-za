@@ -588,6 +588,11 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen w-full bg-gradient-to-b from-green-50 via-white to-indigo-50 transition-colors">
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 py-6 md:py-8">
+          {/* Notification bell and Logout in header */}
+          <div className="flex justify-end items-center gap-2 mb-4">
+            <NotificationsDropdown />
+            <LogoutButton />
+          </div>
           {/* Dev-only Seeder - Remove/comment out before production! */}
           {profile?.id && (
             <div>
