@@ -1,0 +1,140 @@
+
+import React, { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+
+type AuthMode = "login" | "signup";
+
+const Auth = () => {
+  const [mode, setMode] = useState<AuthMode>("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [authed, setAuthed] = useState(false);
+  const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setAuthed(true);
+        navigate("/", { replace: true });
+      }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setAuthed(true);
+        navigate("/", { replace: true });
+      }
+    });
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [navigate]);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (!email || !password || (mode === "signup" && (!firstName || !lastName))) {
+      toast({ title: "Missing fields", description: "Please fill all required fields." });
+      setLoading(false);
+      return;
+    }
+    if (mode === "signup") {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+          }
+        }
+      });
+      if (error) {
+        toast({ title: "Signup failed", description: error.message });
+      } else {
+        toast({ title: "Signup successful", description: "Check your email for a confirmation link (if required)." });
+        setMode("login");
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast({ title: "Login failed", description: error.message });
+      } else {
+        toast({ title: "Logged in", description: "Welcome back!" });
+      }
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md p-8 bg-white rounded shadow">
+        <h1 className="text-2xl font-bold mb-2">{mode === "login" ? "Login" : "Sign Up"}</h1>
+        <form className="space-y-4" onSubmit={onSubmit}>
+          {mode === "signup" && (
+            <>
+              <Input
+                placeholder="First name"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                required
+                disabled={loading}
+              />
+              <Input
+                placeholder="Last name"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </>
+          )}
+          <Input
+            type="email"
+            placeholder="Email"
+            autoComplete="username"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            disabled={loading}
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            disabled={loading}
+          />
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? (mode === "login" ? "Logging in..." : "Signing up...") : (mode === "login" ? "Login" : "Sign Up")}
+          </Button>
+        </form>
+        <div className="mt-4 text-center text-sm">
+          {mode === "login" ? (
+            <>
+              Don&apos;t have an account?{" "}
+              <button className="font-medium text-primary hover:underline" onClick={() => setMode("signup")}>Sign up</button>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <button className="font-medium text-primary hover:underline" onClick={() => setMode("login")}>Login</button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Auth;
