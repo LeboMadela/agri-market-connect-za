@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatDialog } from "./ChatDialog";
+import { supabase } from "@/integrations/supabase/client"; // FIX: Import supabase
 
 type Produce = {
   id: string;

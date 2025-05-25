@@ -9,13 +9,15 @@ export function NotificationsDropdown() {
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+      if (!userId) return [];
       const { data, error } = await supabase
         .from("notifications")
         .select("*")
-        .eq("user_id", supabase.auth.getUser().then(res => res.data.user?.id))
+        .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(15);
-      // Defensive: supabase.auth.getUser() is async, fallback to empty if not available.
       return data ?? [];
     },
   });
