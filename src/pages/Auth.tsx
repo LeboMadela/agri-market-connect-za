@@ -82,7 +82,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded shadow">
         <h1 className="text-2xl font-bold mb-2">{mode === "login" ? "Login" : "Sign Up"}</h1>
-        <form className="space-y-4" onSubmit={onSubmit}>
+        <form className="space-y-4" onSubmit={onSubmit} autoComplete="off">
           {mode === "signup" && (
             <>
               <Input
@@ -100,9 +100,9 @@ const Auth = () => {
                 disabled={loading}
               />
               <div>
-                <label className="block mb-1 font-medium text-sm">Role</label>
-                <Select value={role} onValueChange={val => setRole(val as Role)} disabled={loading}>
-                  <SelectTrigger className="bg-white border" id="role">
+                <label className="block mb-1 font-medium text-sm">Role <span className="text-destructive">*</span></label>
+                <Select value={role} onValueChange={val => setRole(val as Role)} disabled={loading} required>
+                  <SelectTrigger className={`bg-white border ${!role && "border-destructive"}`} id="role">
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -110,6 +110,9 @@ const Auth = () => {
                     <SelectItem value="buyer">Buyer / Market</SelectItem>
                   </SelectContent>
                 </Select>
+                {!role && (
+                  <span className="text-xs text-destructive block mt-1">Select a role to continue</span>
+                )}
               </div>
             </>
           )}
@@ -154,4 +157,3 @@ const Auth = () => {
 };
 
 export default Auth;
-
