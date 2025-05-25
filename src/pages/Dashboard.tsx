@@ -421,6 +421,7 @@ const FarmerDashboard = ({
 
 const ROLE_OPTIONS: { label: string; value: "buyer" | "farmer" }[] = [
   { label: "Buyer", value: "buyer" },
+  { label: "Farmer", value: "farmer" },
 ];
 
 const Dashboard = () => {
