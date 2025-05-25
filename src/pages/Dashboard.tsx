@@ -109,7 +109,7 @@ const Dashboard = () => {
             title="Highest Price Today"
             value={
               highestPrice != null
-                ? `₦${Number(highestPrice).toLocaleString()}`
+                ? `R${Number(highestPrice).toLocaleString()}`
                 : "N/A"
             }
             icon={<ArrowUp size={18} />}
@@ -208,7 +208,11 @@ const Dashboard = () => {
                     <TableRow key={row.id}>
                       <TableCell className="font-semibold">{row.commodity}</TableCell>
                       <TableCell>
-                        <span className="bg-indigo-50 text-indigo-800 px-2 py-1 rounded-md font-mono">{row.price_per_kg?.toLocaleString?.() ?? row.price_per_kg}</span>
+                        <span className="bg-indigo-50 text-indigo-800 px-2 py-1 rounded-md font-mono">
+                          {row.price_per_kg != null
+                            ? `R${row.price_per_kg?.toLocaleString?.() ?? row.price_per_kg}`
+                            : row.price_per_kg}
+                        </span>
                       </TableCell>
                       <TableCell>{row.location}</TableCell>
                       <TableCell>
