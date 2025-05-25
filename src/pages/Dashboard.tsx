@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useBuyerProfile } from "@/hooks/useBuyerProfile";
@@ -13,6 +14,7 @@ import { ProduceGallery } from "@/components/ProduceGallery";
 import { ProduceStats } from "@/components/ProduceStats";
 import { ProduceCropsChart } from "@/components/ProduceCropsChart";
 import { Card } from "@/components/ui/card";
+import { SeedProduceListings } from "@/components/SeedProduceListings";
 
 const ROLE_OPTIONS: { label: string; value: "buyer" | "farmer" }[] = [
   { label: "Buyer", value: "buyer" },
@@ -128,7 +130,7 @@ const Dashboard = () => {
           {currentUserId && (
             <div>
               {/* You can remove this line after seeding! */}
-              <require('@/components/SeedProduceListings').SeedProduceListings farmer_id={currentUserId} />
+              <SeedProduceListings farmer_id={currentUserId} />
             </div>
           )}
           {/* Welcome banner */}
