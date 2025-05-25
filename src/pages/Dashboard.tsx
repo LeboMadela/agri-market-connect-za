@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useBuyerProfile } from "@/hooks/useBuyerProfile";
@@ -15,6 +14,10 @@ import { SeedProduceListings } from "@/components/SeedProduceListings";
 import { BarChart2 } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import clsx from "clsx";
+import { ProduceStats } from "@/components/ProduceStats";
+import { ProduceCropsChart } from "@/components/ProduceCropsChart";
+import { ProduceSidebarFilters } from "@/components/ProduceSidebarFilters";
+import { ProduceGallery } from "@/components/ProduceGallery";
 
 // -- HELPER HOOKS --
 function useFarmerProduce(farmer_id: string | undefined) {
@@ -610,4 +613,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
