@@ -593,13 +593,7 @@ const Dashboard = () => {
             <NotificationsDropdown />
             <LogoutButton />
           </div>
-          {/* Dev-only Seeder - Remove/comment out before production! */}
-          {profile?.id && (
-            <div>
-              {/* You can remove this line after seeding! */}
-              <SeedProduceListings farmer_id={profile.id} />
-            </div>
-          )}
+          {/* The demo insert button has been removed as requested. */}
           {/* Welcome banner */}
           <div className="rounded-xl bg-gradient-to-br from-green-200 to-indigo-100 shadow-md mb-8 p-6 md:p-8 flex items-center justify-between animate-scale-in">
             <div>
