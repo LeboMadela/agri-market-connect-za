@@ -1,11 +1,14 @@
+
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type AuthMode = "login" | "signup";
+type Role = "farmer" | "buyer";
 
 const Auth = () => {
   const [mode, setMode] = useState<AuthMode>("login");
@@ -13,6 +16,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [role, setRole] = useState<Role | "">("");
   const [loading, setLoading] = useState(false);
   const [authed, setAuthed] = useState(false);
   const navigate = useNavigate();
@@ -40,7 +44,7 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    if (!email || !password || (mode === "signup" && (!firstName || !lastName))) {
+    if (!email || !password || (mode === "signup" && (!firstName || !lastName || !role))) {
       toast({ title: "Missing fields", description: "Please fill all required fields." });
       setLoading(false);
       return;
@@ -53,6 +57,7 @@ const Auth = () => {
           data: {
             first_name: firstName,
             last_name: lastName,
+            role,
           }
         }
       });
@@ -94,6 +99,18 @@ const Auth = () => {
                 required
                 disabled={loading}
               />
+              <div>
+                <label className="block mb-1 font-medium text-sm">Role</label>
+                <Select value={role} onValueChange={val => setRole(val as Role)} disabled={loading}>
+                  <SelectTrigger className="bg-white border" id="role">
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="farmer">Farmer</SelectItem>
+                    <SelectItem value="buyer">Buyer / Market</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </>
           )}
           <Input
@@ -137,3 +154,4 @@ const Auth = () => {
 };
 
 export default Auth;
+

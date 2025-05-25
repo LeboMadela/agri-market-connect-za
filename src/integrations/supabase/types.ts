@@ -9,6 +9,85 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      buyer_profiles: {
+        Row: {
+          contact_email: string | null
+          created_at: string | null
+          id: string
+          location: string | null
+          organization: string | null
+          phone: string | null
+          user_id: string
+        }
+        Insert: {
+          contact_email?: string | null
+          created_at?: string | null
+          id?: string
+          location?: string | null
+          organization?: string | null
+          phone?: string | null
+          user_id: string
+        }
+        Update: {
+          contact_email?: string | null
+          created_at?: string | null
+          id?: string
+          location?: string | null
+          organization?: string | null
+          phone?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buyer_requests: {
+        Row: {
+          buyer_id: string | null
+          created_at: string | null
+          crop_name: string
+          id: string
+          location: string | null
+          notes: string | null
+          preferred_price: number | null
+          preferred_quantity: number | null
+        }
+        Insert: {
+          buyer_id?: string | null
+          created_at?: string | null
+          crop_name: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          preferred_price?: number | null
+          preferred_quantity?: number | null
+        }
+        Update: {
+          buyer_id?: string | null
+          created_at?: string | null
+          crop_name?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          preferred_price?: number | null
+          preferred_quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_requests_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "buyer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_prices: {
         Row: {
           commodity: string | null
@@ -33,21 +112,68 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string | null
+          channel: string
+          created_at: string | null
+          data: Json | null
+          id: string
+          seen: boolean | null
+          title: string | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          channel: string
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          seen?: boolean | null
+          title?: string | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          channel?: string
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          seen?: boolean | null
+          title?: string | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           first_name: string | null
           id: string
           last_name: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
         }
         Insert: {
           first_name?: string | null
           id: string
           last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
         }
         Update: {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
         }
         Relationships: []
       }
@@ -59,7 +185,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "farmer" | "buyer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -174,6 +300,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["farmer", "buyer"],
+    },
   },
 } as const
