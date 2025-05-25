@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { useQuery } from "@tanstack/react-query";
@@ -65,25 +64,23 @@ const Dashboard = () => {
               <div className="flex items-center justify-center h-10">
                 <Loader2 className="animate-spin" />
               </div>
-            ) : (
+            ) : locations && locations.length > 0 ? (
               <Select value={selectedLocation ?? ""} onValueChange={setSelectedLocation}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a location" />
                 </SelectTrigger>
                 <SelectContent>
-                  {locations && locations.length > 0 ? (
-                    locations.map(l => (
-                      <SelectItem key={l} value={l}>
-                        {l}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="" disabled>
-                      No locations found
+                  {locations.map(l => (
+                    <SelectItem key={l} value={l}>
+                      {l}
                     </SelectItem>
-                  )}
+                  ))}
                 </SelectContent>
               </Select>
+            ) : (
+              <div className="flex items-center justify-center h-10 text-muted-foreground text-sm">
+                No locations found
+              </div>
             )}
           </div>
         </div>
