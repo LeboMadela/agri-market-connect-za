@@ -86,17 +86,18 @@ const FarmerDashboard = ({
   marketLoading: boolean;
 }) => {
   // Price tracker -- location filter
-  const uniqueLocations = useMemo(() => extractUniqueLocations(marketPrices), [marketPrices]);
-  const [selectedLocation, setSelectedLocation] = useState(uniqueLocations[0] || "");
+  const uniqueLocations = React.useMemo(() => extractUniqueLocations(marketPrices), [marketPrices]);
+  // Fix: default value is "__all__" instead of empty string
+  const [selectedLocation, setSelectedLocation] = React.useState("__all__");
 
   // Filtered prices for selected location (or all)
-  const filteredPrices = useMemo(() => {
-    if (!selectedLocation) return marketPrices;
+  const filteredPrices = React.useMemo(() => {
+    if (selectedLocation === "__all__") return marketPrices;
     return marketPrices.filter((row) => row.location === selectedLocation);
   }, [marketPrices, selectedLocation]);
 
   // Bar chart data: one bar per commodity in this region
-  const barChartData = useMemo(() => {
+  const barChartData = React.useMemo(() => {
     // Take latest price for each commodity in the region
     const latestPerCommodity: { [c: string]: any } = {};
     filteredPrices.forEach(row => {
@@ -207,14 +208,14 @@ const FarmerDashboard = ({
                 <div className="flex flex-col md:flex-row md:items-center gap-5 mb-5">
                   <div className="flex-1">
                     <Select
-                      value={selectedLocation || ""}
+                      value={selectedLocation}
                       onValueChange={val => setSelectedLocation(val)}
                     >
                       <SelectTrigger className="w-full md:w-72 bg-white border-stone-200 shadow text-stone-800">
                         <SelectValue placeholder="Filter by location…" />
                       </SelectTrigger>
                       <SelectContent className="z-20 bg-white">
-                        <SelectItem key="all" value="">
+                        <SelectItem key="all" value="__all__">
                           All regions
                         </SelectItem>
                         {uniqueLocations.map((loc) => (
@@ -484,7 +485,7 @@ const Dashboard = () => {
   const { marketPrices, loading: marketLoading } = useMarketPrices();
 
   // Calculate stats & chart data
-  const stats = useMemo(() => {
+  const stats = React.useMemo(() => {
     const totalListings = produceListings.length;
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -505,7 +506,7 @@ const Dashboard = () => {
     return { totalListings, newListings, topCrops };
   }, [produceListings]);
 
-  const chartData = useMemo(() => {
+  const chartData = React.useMemo(() => {
     // { region: string, count: number }
     const regions: Record<string, number> = {};
     produceListings.forEach(p => {
