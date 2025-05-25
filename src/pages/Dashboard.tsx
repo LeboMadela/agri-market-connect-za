@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useMemo } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useBuyerProfile } from "@/hooks/useBuyerProfile";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -7,29 +8,64 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useProduceListings, ProduceFilters } from "@/hooks/useProduceListings";
+import { ProduceSidebarFilters } from "@/components/ProduceSidebarFilters";
+import { ProduceGallery } from "@/components/ProduceGallery";
+import { ProduceStats } from "@/components/ProduceStats";
+import { ProduceCropsChart } from "@/components/ProduceCropsChart";
+import { Card } from "@/components/ui/card";
 
-// Add a static role list in case of future roles
 const ROLE_OPTIONS: { label: string; value: "buyer" | "farmer" }[] = [
   { label: "Buyer", value: "buyer" },
-  // Extend with roles in the future:
-  // { label: "Farmer", value: "farmer" }
 ];
 
 const Dashboard = () => {
   const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile();
   const { data: buyerProfile, isLoading: buyerLoading } = useBuyerProfile();
   const [open, setOpen] = useState(false);
-  // Explicitly type as the allowed enum (matches Supabase type)
+
   const [selectedRole, setSelectedRole] = useState<"buyer" | "farmer">("buyer");
   const [roleUpdating, setRoleUpdating] = useState(false);
 
-  // Debug logs to help diagnose dashboard rendering issues
-  console.log("Dashboard - profile:", profile);
-  console.log("Dashboard - profileLoading:", profileLoading);
-  console.log("Dashboard - buyerProfile:", buyerProfile);
-  console.log("Dashboard - buyerLoading:", buyerLoading);
+  // Filters for produce listings
+  const [filters, setFilters] = useState<ProduceFilters>({});
+  const { data: produceListings = [], isLoading: produceLoading } = useProduceListings(filters);
 
-  // If loading
+  // Calculate stats & chart data
+  const stats = useMemo(() => {
+    const totalListings = produceListings.length;
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const newListings = produceListings.filter(p =>
+      new Date(p.date_posted) >= weekAgo
+    ).length;
+
+    // Top 3 most common crops
+    const counts: Record<string, number> = {};
+    produceListings.forEach(p => {
+      counts[p.commodity] = (counts[p.commodity] ?? 0) + 1;
+    });
+    const topCrops = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([c]) => c);
+
+    return { totalListings, newListings, topCrops };
+  }, [produceListings]);
+
+  const chartData = useMemo(() => {
+    // { region: string, count: number }
+    const regions: Record<string, number> = {};
+    produceListings.forEach(p => {
+      const loc = p.location || "Unknown";
+      regions[loc] = (regions[loc] ?? 0) + 1;
+    });
+    return Object.entries(regions).map(([region, count]) => ({ region, count }));
+  }, [produceListings]);
+
+  // Debug logs (remove later)
+  // console.log("produceListings", produceListings, "filters", filters);
+
   if (profileLoading || buyerLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -38,7 +74,6 @@ const Dashboard = () => {
     );
   }
 
-  // If profile exists but has no role, prompt selection
   if (profile && !profile.role) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -49,7 +84,6 @@ const Dashboard = () => {
             <select
               className="border rounded px-3 py-2 w-full"
               value={selectedRole}
-              // onChange now infers correct type
               onChange={e => setSelectedRole(e.target.value as "buyer" | "farmer")}
               disabled={roleUpdating}
             >
@@ -63,7 +97,6 @@ const Dashboard = () => {
             disabled={roleUpdating}
             onClick={async () => {
               setRoleUpdating(true);
-              // Update the profile table via Supabase
               const { error } = await supabase
                 .from("profiles")
                 .update({ role: selectedRole })
@@ -84,53 +117,64 @@ const Dashboard = () => {
     );
   }
 
-  // Only handle buyer dashboard for now
   if (profile?.role === "buyer") {
+    // Welcome banner — magical, inspiring, marketplace-of-opportunities feel!
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-full max-w-xl bg-white rounded shadow p-8">
-          <h2 className="text-2xl font-bold mb-4">Buyer Dashboard</h2>
-          {buyerProfile ? (
-            <>
-              <div className="mb-4">
-                <div><span className="font-semibold">Organization:</span> {buyerProfile.organization || "—"}</div>
-                <div><span className="font-semibold">Contact Email:</span> {buyerProfile.contact_email || "—"}</div>
-                <div><span className="font-semibold">Phone:</span> {buyerProfile.phone || "—"}</div>
-                <div><span className="font-semibold">Location:</span> {buyerProfile.location || "—"}</div>
-              </div>
-              <Sheet open={open} onOpenChange={setOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="mb-4">Edit Profile</Button>
-                </SheetTrigger>
-                <SheetContent side="right">
-                  <SheetTitle>Edit Buyer Profile</SheetTitle>
-                  <BuyerProfileForm
-                    initial={buyerProfile}
-                    onSuccess={() => setOpen(false)}
-                  />
-                </SheetContent>
-              </Sheet>
-            </>
-          ) : (
+      <div className="min-h-screen w-full bg-gradient-to-b from-green-50 via-white to-indigo-50 transition-colors">
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 py-6 md:py-8">
+          {/* Welcome banner */}
+          <div className="rounded-xl bg-gradient-to-br from-green-200 to-indigo-100 shadow-md mb-8 p-6 md:p-8 flex items-center justify-between animate-scale-in">
             <div>
-              <p className="mb-4">You haven't completed your buyer profile yet.</p>
-              <Sheet open={open} onOpenChange={setOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="default">Complete Profile</Button>
-                </SheetTrigger>
-                <SheetContent side="right">
-                  <SheetTitle>Complete Buyer Profile</SheetTitle>
-                  <BuyerProfileForm onSuccess={() => setOpen(false)} />
-                </SheetContent>
-              </Sheet>
+              <h1 className="text-2xl sm:text-3xl font-bold text-green-900 mb-2 animate-fade-in">
+                Welcome, {profile.first_name || "AgriConnect Buyer"}!
+              </h1>
+              <div className="text-base sm:text-lg font-medium text-indigo-700 animate-fade-in">
+                {buyerProfile?.location
+                  ? `Discover fresh local produce in ${buyerProfile.location}.`
+                  : "Discover your region's freshest opportunities."}
+              </div>
             </div>
-          )}
+            <img
+              src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=240&q=80"
+              alt="market"
+              className="hidden md:block rounded-xl h-20 w-28 object-cover border border-primary shadow"
+              style={{ minWidth: "100px" }}
+            />
+          </div>
+          {/* Stats & Chart */}
+          <div className="flex flex-col-reverse lg:flex-row gap-4 mb-8">
+            <div className="flex-1 space-y-4">
+              <ProduceStats stats={stats} />
+              <ProduceCropsChart data={chartData} />
+            </div>
+            <div className="w-full max-w-xs flex-shrink-0 mb-6 lg:mb-0 mx-auto lg:mx-0">
+              <ProduceSidebarFilters onChange={f => {
+                const normalized = {
+                  ...f,
+                  minPrice: f.minPrice ? parseFloat(f.minPrice) : undefined,
+                  maxPrice: f.maxPrice ? parseFloat(f.maxPrice) : undefined,
+                };
+                setFilters(normalized);
+              }} />
+            </div>
+          </div>
+          {/* Produce gallery */}
+          <div className="mb-12">
+            <h2 className="font-bold text-2xl text-indigo-900 mb-6 px-1">Available Crops</h2>
+            {produceLoading ? (
+              <div className="flex h-40 items-center justify-center text-muted-foreground animate-fade-in">
+                Fetching the latest listings...
+              </div>
+            ) : (
+              <ProduceGallery produce={produceListings} />
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
-  // You can later add farmer dashboard and default UI here
+  // Can later add farmer dashboard and default UI here
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-xl bg-white rounded shadow p-8">

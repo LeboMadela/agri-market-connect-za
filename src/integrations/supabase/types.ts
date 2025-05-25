@@ -41,7 +41,7 @@ export type Database = {
           {
             foreignKeyName: "buyer_profiles_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -150,6 +150,47 @@ export type Database = {
           {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produce_listings: {
+        Row: {
+          commodity: string
+          date_posted: string
+          farmer_contact: string
+          farmer_id: string
+          id: string
+          location: string
+          price_per_kg: number
+          quantity_kg: number
+        }
+        Insert: {
+          commodity: string
+          date_posted?: string
+          farmer_contact: string
+          farmer_id: string
+          id?: string
+          location: string
+          price_per_kg: number
+          quantity_kg: number
+        }
+        Update: {
+          commodity?: string
+          date_posted?: string
+          farmer_contact?: string
+          farmer_id?: string
+          id?: string
+          location?: string
+          price_per_kg?: number
+          quantity_kg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produce_listings_farmer_id_fkey"
+            columns: ["farmer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
