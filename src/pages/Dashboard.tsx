@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useBuyerProfile } from "@/hooks/useBuyerProfile";
@@ -9,6 +10,12 @@ const Dashboard = () => {
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: buyerProfile, isLoading: buyerLoading } = useBuyerProfile();
   const [open, setOpen] = useState(false);
+
+  // Debug logs to help diagnose dashboard rendering issues
+  console.log("Dashboard - profile:", profile);
+  console.log("Dashboard - profileLoading:", profileLoading);
+  console.log("Dashboard - buyerProfile:", buyerProfile);
+  console.log("Dashboard - buyerLoading:", buyerLoading);
 
   if (profileLoading || buyerLoading) {
     return (
@@ -76,3 +83,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
