@@ -35,7 +35,7 @@ const Dashboard = () => {
   const { user } = useSession();
   const [selectedLocation, setSelectedLocation] = useState<string | undefined>(undefined);
 
-  // Get user profile (name, location) for welcome header
+  // Get user profile (name) for welcome header
   const {
     data: profile,
     isLoading: profileLoading,
@@ -49,6 +49,7 @@ const Dashboard = () => {
   const {
     data: prices,
     isLoading: pricesLoading,
+    refetch: refetchPrices,
   } = useQuery({
     queryKey: ["market_prices", selectedLocation],
     queryFn: () => fetchMarketPrices(selectedLocation),
@@ -84,7 +85,9 @@ const Dashboard = () => {
 
   // Welcome text helpers
   const fullName = profile ? [profile.first_name, profile.last_name].filter(Boolean).join(" ") : "";
-  const userLocation = profile?.location ?? selectedLocation ?? "";
+  // Fix: the profile table has no location column, 
+  // so only show the selectedLocation or fallback string
+  const userLocation = selectedLocation ?? "No location set";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 flex flex-col items-center px-2 py-6">
@@ -97,7 +100,7 @@ const Dashboard = () => {
           </span>
           <span className="flex items-center gap-2 justify-center text-base text-gray-600 font-medium">
             <MapPin size={18} className="text-indigo-500" />
-            {userLocation ? userLocation : "No location set"}
+            {userLocation}
           </span>
         </div>
         {/* Stats Cards Row */}
