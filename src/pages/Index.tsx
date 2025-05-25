@@ -17,13 +17,14 @@ const Index = () => {
           </Link>
         ) : (
           <div>
-            <p className="text-green-600">You are logged in.</p>
-            {/* Add app content for logged-in users here */}
+            <p className="text-green-600 mb-2">You are logged in.</p>
+            <Link to="/dashboard">
+              <Button variant="outline">Go to Dashboard</Button>
+            </Link>
           </div>
         )}
       </div>
     </div>
   );
 };
-
 export default Index;

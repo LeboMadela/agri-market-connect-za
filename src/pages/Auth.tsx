@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,13 +22,13 @@ const Auth = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setAuthed(true);
-        navigate("/", { replace: true });
+        navigate("/dashboard", { replace: true });
       }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         setAuthed(true);
-        navigate("/", { replace: true });
+        navigate("/dashboard", { replace: true });
       }
     });
     return () => {
