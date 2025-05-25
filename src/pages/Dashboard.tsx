@@ -21,6 +21,7 @@ import { ProduceGallery } from "@/components/ProduceGallery";
 import { EditProduceDialog } from "@/components/EditProduceDialog";
 import { DeleteProduceConfirm } from "@/components/DeleteProduceConfirm";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
+import { LogoutButton } from "@/components/LogoutButton";
 
 // -- HELPER HOOKS --
 function useFarmerProduce(farmer_id: string | undefined) {
@@ -162,9 +163,10 @@ const FarmerDashboard = ({
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-amber-50 via-green-100 to-stone-50 pb-16">
       <div className="max-w-7xl mx-auto px-2 sm:px-6 py-6 md:py-8">
-        {/* Notification bell in Farmer dashboard header */}
-        <div className="flex justify-end mb-4">
+        {/* Notification bell and Logout in header */}
+        <div className="flex justify-end items-center gap-2 mb-4">
           <NotificationsDropdown />
+          <LogoutButton />
         </div>
         {/* Greeting */}
         <div className="rounded-xl bg-gradient-to-br from-green-200 to-amber-100 shadow-md mb-8 p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between animate-fade-in">

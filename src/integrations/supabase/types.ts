@@ -191,6 +191,36 @@ export type Database = {
           },
         ]
       }
+      price_alerts: {
+        Row: {
+          commodity: string
+          created_at: string | null
+          email: string
+          id: string
+          location: string | null
+          price_trigger: number
+          user_id: string
+        }
+        Insert: {
+          commodity: string
+          created_at?: string | null
+          email: string
+          id?: string
+          location?: string | null
+          price_trigger: number
+          user_id: string
+        }
+        Update: {
+          commodity?: string
+          created_at?: string | null
+          email?: string
+          id?: string
+          location?: string | null
+          price_trigger?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       produce_listings: {
         Row: {
           commodity: string
