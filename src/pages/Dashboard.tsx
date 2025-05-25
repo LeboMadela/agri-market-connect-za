@@ -476,10 +476,12 @@ const Dashboard = () => {
   const [open, setOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<"buyer" | "farmer">("buyer");
   const [roleUpdating, setRoleUpdating] = useState(false);
-
-  // Filters for produce listings
   const [filters, setFilters] = useState<ProduceFilters>({});
   const { data: produceListings = [], isLoading: produceLoading } = useProduceListings(filters);
+
+  // Fix: Always call these hooks, pass undefined to disable when not farmer
+  const { rows: produceRows, loading: farmerProduceLoading, refresh: refreshProduce } = useFarmerProduce(profile?.role === "farmer" ? profile.id : undefined);
+  const { marketPrices, loading: marketLoading } = useMarketPrices();
 
   // Calculate stats & chart data
   const stats = useMemo(() => {
@@ -567,15 +569,11 @@ const Dashboard = () => {
 
   // FARMER DASHBOARD
   if (profile?.role === "farmer") {
-    // Farmer's own produce listings and market prices
-    const { rows: produceRows, loading: produceLoading, refresh: refreshProduce } = useFarmerProduce(profile.id);
-    const { marketPrices, loading: marketLoading } = useMarketPrices();
-
     return (
       <FarmerDashboard
         profile={profile}
         produceRows={produceRows}
-        produceLoading={produceLoading}
+        produceLoading={farmerProduceLoading}
         refreshProduce={refreshProduce}
         marketPrices={marketPrices}
         marketLoading={marketLoading}
