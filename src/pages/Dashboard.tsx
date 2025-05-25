@@ -1,14 +1,15 @@
-
 import React, { useEffect, useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BarChart as BarChartIcon, Table as TableIcon, LayoutDashboard } from "lucide-react";
+import { BarChart as BarChartIcon, Table as TableIcon, LayoutDashboard, ArrowUp, MapPin, CalendarDays, FileText } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Loader2 } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
+import { StatsCard } from "@/components/StatsCard";
 
 const fetchLocations = async () => {
   const { data, error } = await supabase
@@ -34,6 +35,12 @@ const Dashboard = () => {
   const { user } = useSession();
   const [selectedLocation, setSelectedLocation] = useState<string | undefined>(undefined);
 
+  // Get user profile (name, location) for welcome header
+  const {
+    data: profile,
+    isLoading: profileLoading,
+  } = useProfile();
+
   const { data: locations, isLoading: locationsLoading } = useQuery({
     queryKey: ["locations"],
     queryFn: fetchLocations,
@@ -42,7 +49,6 @@ const Dashboard = () => {
   const {
     data: prices,
     isLoading: pricesLoading,
-    refetch: refetchPrices,
   } = useQuery({
     queryKey: ["market_prices", selectedLocation],
     queryFn: () => fetchMarketPrices(selectedLocation),
@@ -53,15 +59,72 @@ const Dashboard = () => {
     if (user) refetchPrices();
   }, [selectedLocation, user, refetchPrices]);
 
+  // --- Stats Card Values ---
+  // Highest price today
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10); // 'YYYY-MM-DD'
+  const pricesToday = (prices || []).filter(r => r.date_updated?.slice(0,10) === todayStr && typeof r.price_per_kg === "number");
+  const highestPrice = pricesToday.length
+    ? Math.max(...pricesToday.map(r => r.price_per_kg || 0))
+    : null;
+
+  // Most common crop (commodity with max number of price records for selected location)
+  const commodityCounts: Record<string, number> = {};
+  (prices || []).forEach(r => {
+    if (r.commodity) commodityCounts[r.commodity] = (commodityCounts[r.commodity] || 0) + 1;
+  });
+  const mostCommonCrop = Object.entries(commodityCounts).sort((a,b) => b[1]-a[1])[0]?.[0] ?? "-";
+
+  // Latest update date
+  const latestUpdate = (prices || [])
+    .map(row => row.date_updated)
+    .filter(Boolean)
+    .sort()
+    .reverse()[0];
+
+  // Welcome text helpers
+  const fullName = profile ? [profile.first_name, profile.last_name].filter(Boolean).join(" ") : "";
+  const userLocation = profile?.location ?? selectedLocation ?? "";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 flex flex-col items-center px-2 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 flex flex-col items-center px-2 py-6">
       <div className="w-full max-w-3xl space-y-6">
-        <div className="flex flex-col items-center gap-2">
-          <span className="inline-flex items-center gap-2 text-indigo-700 text-3xl font-extrabold tracking-tight">
+        {/* Welcome Header */}
+        <div className="text-center flex flex-col items-center gap-2 mb-3">
+          <span className="flex items-center gap-3 text-indigo-700 text-2xl font-extrabold tracking-tight">
             <LayoutDashboard size={30} className="stroke-2" />
-            Market Prices Dashboard
+            Welcome{fullName ? `, ${fullName}` : ""}!
           </span>
-          <div className="text-base text-gray-500">View latest commodity prices by location</div>
+          <span className="flex items-center gap-2 justify-center text-base text-gray-600 font-medium">
+            <MapPin size={18} className="text-indigo-500" />
+            {userLocation ? userLocation : "No location set"}
+          </span>
+        </div>
+        {/* Stats Cards Row */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+          <StatsCard
+            title="Highest Price Today"
+            value={
+              highestPrice != null
+                ? `₦${Number(highestPrice).toLocaleString()}`
+                : "N/A"
+            }
+            icon={<ArrowUp size={18} />}
+          />
+          <StatsCard
+            title="Most Common Crop"
+            value={mostCommonCrop}
+            icon={<FileText size={18} />}
+          />
+          <StatsCard
+            title="Latest Update"
+            value={
+              latestUpdate
+                ? new Date(latestUpdate).toLocaleDateString()
+                : "-"
+            }
+            icon={<CalendarDays size={18} />}
+          />
         </div>
         {/* Location Dropdown */}
         <div className="flex justify-center">
@@ -105,7 +168,7 @@ const Dashboard = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={prices}>
                   <XAxis dataKey="commodity" stroke="#6366f1" fontSize={13} />
-                  <YAxis width={45} tickFormatter={v => (typeof v === "number" ? v.toLocaleString() : v)} stroke="#6366f1" fontSize={13} />
+                  <YAxis width={40} tickFormatter={v => (typeof v === "number" ? v.toLocaleString() : v)} stroke="#6366f1" fontSize={13} />
                   <Tooltip />
                   <Legend />
                   <Bar dataKey="price_per_kg" fill="#6366f1" name="Price per kg" radius={[8,8,0,0]} />
