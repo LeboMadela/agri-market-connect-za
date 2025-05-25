@@ -1,8 +1,8 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ChatDialog } from "./ChatDialog";
 
 type Produce = {
   id: string;
@@ -16,6 +16,20 @@ type Produce = {
 
 export function ProduceCard({ produce }: { produce: Produce }) {
   const [showContact, setShowContact] = useState(false);
+
+  // Chat dialog for buyers
+  const [chatOpen, setChatOpen] = useState(false);
+
+  // Get user id to show chat only for buyers
+  const [userId, setUserId] = React.useState<string | null>(null);
+  const [isFarmer, setIsFarmer] = React.useState(false);
+  React.useEffect(() => {
+    supabase.auth.getUser().then(res => {
+      setUserId(res.data.user?.id || null);
+      // show chat if user is not the farmer
+      setIsFarmer(res.data.user?.id === produce.farmer_contact);
+    });
+  }, [produce.farmer_contact]);
 
   return (
     <div className={cn(
@@ -51,8 +65,23 @@ export function ProduceCard({ produce }: { produce: Produce }) {
             Contact Farmer <ArrowRight size={16} />
           </Button>
         ) : (
-          <div className="text-center text-green-900 font-medium bg-green-50 p-2 rounded-md animate-fade-in">
-            Contact: {produce.farmer_contact}
+          <div>
+            <div className="text-center text-green-900 font-medium bg-green-50 p-2 rounded-md animate-fade-in">
+              Contact: {produce.farmer_contact}
+            </div>
+            {/* Show inquire/chat button for buyers */}
+            {!isFarmer && (
+              <>
+                <Button
+                  variant="outline"
+                  className="w-full mt-2"
+                  onClick={() => setChatOpen(true)}
+                >
+                  Send Inquiry / Chat
+                </Button>
+                <ChatDialog open={chatOpen} onOpenChange={setChatOpen} produceId={produce.id} farmerId={produce.farmer_contact} />
+              </>
+            )}
           </div>
         )}
       </div>

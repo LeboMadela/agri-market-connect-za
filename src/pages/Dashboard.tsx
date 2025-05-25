@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useBuyerProfile } from "@/hooks/useBuyerProfile";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -18,6 +18,9 @@ import { ProduceStats } from "@/components/ProduceStats";
 import { ProduceCropsChart } from "@/components/ProduceCropsChart";
 import { ProduceSidebarFilters } from "@/components/ProduceSidebarFilters";
 import { ProduceGallery } from "@/components/ProduceGallery";
+import { EditProduceDialog } from "@/components/EditProduceDialog";
+import { DeleteProduceConfirm } from "@/components/DeleteProduceConfirm";
+import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 
 // -- HELPER HOOKS --
 function useFarmerProduce(farmer_id: string | undefined) {
@@ -109,6 +112,12 @@ const FarmerDashboard = ({
     }));
   }, [filteredPrices]);
 
+  // Edit/Delete dialog state management
+  const [editOpen, setEditOpen] = React.useState(false);
+  const [editProduce, setEditProduce] = React.useState<any | null>(null);
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+
   // -- Add New Produce --
   const [form, setForm] = useState({
     commodity: "",
@@ -153,6 +162,10 @@ const FarmerDashboard = ({
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-amber-50 via-green-100 to-stone-50 pb-16">
       <div className="max-w-7xl mx-auto px-2 sm:px-6 py-6 md:py-8">
+        {/* Notification bell in Farmer dashboard header */}
+        <div className="flex justify-end mb-4">
+          <NotificationsDropdown />
+        </div>
         {/* Greeting */}
         <div className="rounded-xl bg-gradient-to-br from-green-200 to-amber-100 shadow-md mb-8 p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between animate-fade-in">
           <div>
@@ -364,6 +377,7 @@ const FarmerDashboard = ({
                         <TableHead>Price/kg</TableHead>
                         <TableHead>Location</TableHead>
                         <TableHead>Date Posted</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -372,7 +386,7 @@ const FarmerDashboard = ({
                           <TableCell colSpan={5} className="text-center py-6 text-stone-400 italic">No produce posted yet.</TableCell>
                         </TableRow>
                       )}
-                      {produceRows.map((row, i) => (
+                      {produceRows.map((row) => (
                         <TableRow
                           key={row.id}
                           className="hover:bg-amber-100/70 cursor-pointer transition-colors duration-150"
@@ -386,10 +400,40 @@ const FarmerDashboard = ({
                               ? new Date(row.date_posted).toLocaleDateString()
                               : "-"}
                           </TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => { setEditProduce(row); setEditOpen(true); }}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="ml-2"
+                              onClick={() => { setDeleteId(row.id); setDeleteOpen(true); }}
+                            >
+                              Delete
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
+                  {/* Edit/Delete dialogs */}
+                  <EditProduceDialog 
+                    open={editOpen} 
+                    onOpenChange={setEditOpen} 
+                    produce={editProduce}
+                    onUpdated={refreshProduce}
+                  />
+                  <DeleteProduceConfirm 
+                    open={deleteOpen}
+                    onOpenChange={setDeleteOpen}
+                    produceId={deleteId}
+                    onDeleted={refreshProduce}
+                  />
                 </div>
               )}
             </CardContent>
