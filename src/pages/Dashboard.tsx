@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useBuyerProfile } from "@/hooks/useBuyerProfile";
@@ -117,11 +116,21 @@ const Dashboard = () => {
     );
   }
 
+  // Get current user as potential farmer
+  const currentUserId = profile?.id;
+
   if (profile?.role === "buyer") {
     // Welcome banner — magical, inspiring, marketplace-of-opportunities feel!
     return (
       <div className="min-h-screen w-full bg-gradient-to-b from-green-50 via-white to-indigo-50 transition-colors">
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 py-6 md:py-8">
+          {/* Dev-only Seeder - Remove/comment out before production! */}
+          {currentUserId && (
+            <div>
+              {/* You can remove this line after seeding! */}
+              <require('@/components/SeedProduceListings').SeedProduceListings farmer_id={currentUserId} />
+            </div>
+          )}
           {/* Welcome banner */}
           <div className="rounded-xl bg-gradient-to-br from-green-200 to-indigo-100 shadow-md mb-8 p-6 md:p-8 flex items-center justify-between animate-scale-in">
             <div>
