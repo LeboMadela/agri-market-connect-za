@@ -22,6 +22,7 @@ import { EditProduceDialog } from "@/components/EditProduceDialog";
 import { DeleteProduceConfirm } from "@/components/DeleteProduceConfirm";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { LogoutButton } from "@/components/LogoutButton";
+import { CropAssistantDialog } from "@/components/CropAssistantDialog";
 
 // -- HELPER HOOKS --
 function useFarmerProduce(farmer_id: string | undefined) {
@@ -484,6 +485,10 @@ const Dashboard = () => {
   const { rows: produceRows, loading: farmerProduceLoading, refresh: refreshProduce } = useFarmerProduce(profile?.role === "farmer" ? profile.id : undefined);
   const { marketPrices, loading: marketLoading } = useMarketPrices();
 
+  // Add real-time listing updates for all users
+  // (Works in both buyer and farmer dashboards)
+  require("@/hooks/useRealtimeProduce").useRealtimeProduce();
+
   // Calculate stats & chart data
   const stats = React.useMemo(() => {
     const totalListings = produceListings.length;
@@ -628,6 +633,8 @@ const Dashboard = () => {
                 };
                 setFilters(normalized);
               }} />
+              {/* Crop Assistant (AI) button for buyers */}
+              <div className="mt-4"><CropAssistantDialog /></div>
             </div>
           </div>
           {/* Produce gallery */}

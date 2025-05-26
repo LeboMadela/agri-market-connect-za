@@ -123,6 +123,84 @@ export type Database = {
           },
         ]
       }
+      crop_view_history: {
+        Row: {
+          id: string
+          produce_id: string
+          user_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          id?: string
+          produce_id: string
+          user_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          id?: string
+          produce_id?: string
+          user_id?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crop_view_history_produce_id_fkey"
+            columns: ["produce_id"]
+            isOneToOne: false
+            referencedRelation: "produce_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crop_view_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      farmer_reviews: {
+        Row: {
+          buyer_id: string
+          created_at: string | null
+          farmer_id: string
+          id: string
+          rating: number
+          review_text: string | null
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string | null
+          farmer_id: string
+          id?: string
+          rating: number
+          review_text?: string | null
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string | null
+          farmer_id?: string
+          id?: string
+          rating?: number
+          review_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farmer_reviews_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "farmer_reviews_farmer_id_fkey"
+            columns: ["farmer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_prices: {
         Row: {
           commodity: string | null
@@ -266,19 +344,25 @@ export type Database = {
         Row: {
           first_name: string | null
           id: string
+          is_verified: boolean | null
           last_name: string | null
+          profile_image_url: string | null
           role: Database["public"]["Enums"]["user_role"] | null
         }
         Insert: {
           first_name?: string | null
           id: string
+          is_verified?: boolean | null
           last_name?: string | null
+          profile_image_url?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
         }
         Update: {
           first_name?: string | null
           id?: string
+          is_verified?: boolean | null
           last_name?: string | null
+          profile_image_url?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
         }
         Relationships: []

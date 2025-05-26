@@ -1,10 +1,14 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatDialog } from "./ChatDialog";
-import { supabase } from "@/integrations/supabase/client"; // FIX: Import supabase
+import { supabase } from "@/integrations/supabase/client";
+import { useCropViewLogger } from "@/hooks/useCropViewLogger";
+import { useProfile } from "@/hooks/useProfile";
+import { FarmerProfileHeader } from "./FarmerProfileHeader";
+import { FarmerReviewList } from "./FarmerReviewList";
+import { FarmerReviewForm } from "./FarmerReviewForm";
 
 type Produce = {
   id: string;
@@ -14,21 +18,26 @@ type Produce = {
   price_per_kg: number;
   farmer_contact: string;
   date_posted: string;
+  farmer_id?: string;
 };
 
 export function ProduceCard({ produce }: { produce: Produce }) {
   const [showContact, setShowContact] = useState(false);
-
-  // Chat dialog for buyers
   const [chatOpen, setChatOpen] = useState(false);
 
-  // Get user id to show chat only for buyers
+  // Real-time view tracking
+  useCropViewLogger(produce.id);
+
+  // Use profile of farmer (id or fallback to contact)
+  const { data: farmerProfile } = useProfile();
+
+  // Get current user for review logic
   const [userId, setUserId] = React.useState<string | null>(null);
   const [isFarmer, setIsFarmer] = React.useState(false);
+
   React.useEffect(() => {
     supabase.auth.getUser().then(res => {
       setUserId(res.data.user?.id || null);
-      // show chat if user is not the farmer
       setIsFarmer(res.data.user?.id === produce.farmer_contact);
     });
   }, [produce.farmer_contact]);
@@ -39,6 +48,7 @@ export function ProduceCard({ produce }: { produce: Produce }) {
       "group animate-fade-in"
     )}>
       <div className="p-5 space-y-2">
+        <FarmerProfileHeader profile={farmerProfile || { first_name: produce.farmer_contact }} />
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-green-900">{produce.commodity}</h3>
         </div>
@@ -82,6 +92,11 @@ export function ProduceCard({ produce }: { produce: Produce }) {
                   Send Inquiry / Chat
                 </Button>
                 <ChatDialog open={chatOpen} onOpenChange={setChatOpen} produceId={produce.id} farmerId={produce.farmer_contact} />
+                {/* Reviews and review form */}
+                <div className="my-2">
+                  <FarmerReviewList farmerId={produce.farmer_id || ""} />
+                  <FarmerReviewForm farmerId={produce.farmer_id || ""} />
+                </div>
               </>
             )}
           </div>
