@@ -23,6 +23,7 @@ import { DeleteProduceConfirm } from "@/components/DeleteProduceConfirm";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { LogoutButton } from "@/components/LogoutButton";
 import { CropAssistantDialog } from "@/components/CropAssistantDialog";
+import { useRealtimeProduce } from "@/hooks/useRealtimeProduce";
 
 // -- HELPER HOOKS --
 function useFarmerProduce(farmer_id: string | undefined) {
@@ -487,7 +488,7 @@ const Dashboard = () => {
 
   // Add real-time listing updates for all users
   // (Works in both buyer and farmer dashboards)
-  require("@/hooks/useRealtimeProduce").useRealtimeProduce();
+  useRealtimeProduce();
 
   // Calculate stats & chart data
   const stats = React.useMemo(() => {
