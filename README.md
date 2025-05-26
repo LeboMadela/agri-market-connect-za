@@ -1,4 +1,9 @@
 # Welcome to your Lovable project
+# Team Members:
+BinaryBesties:
+- Moleboheng Madela
+- Niniwe Xaka
+- Mamokete Moshesha
 
 ## Project info
 
