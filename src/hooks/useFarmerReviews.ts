@@ -26,15 +26,18 @@ export function useSubmitFarmerReview() {
   return useMutation({
     mutationFn: async ({
       farmer_id,
+      buyer_id,
       rating,
       review_text,
     }: {
       farmer_id: string;
+      buyer_id: string;
       rating: number;
       review_text?: string;
     }) => {
       const { error } = await supabase.from("farmer_reviews").insert({
         farmer_id,
+        buyer_id,
         rating,
         review_text,
       });
