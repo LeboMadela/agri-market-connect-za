@@ -1,8 +1,8 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ConfettiBurst } from "./ConfettiBurst";
 
 const ROLE_OPTIONS: { label: string; value: "buyer" | "farmer" }[] = [
   { label: "Buyer", value: "buyer" },
@@ -24,8 +24,11 @@ export function RoleSetupDialog({
   setRoleUpdating: (updating: boolean) => void;
   refetchProfile: () => Promise<any>;
 }) {
+  const [showConfetti, setShowConfetti] = React.useState(false);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <ConfettiBurst trigger={showConfetti} />
       <div className="w-full max-w-md bg-white rounded shadow p-8 flex flex-col items-center">
         <h2 className="text-2xl font-bold mb-4">Set Your Role</h2>
         <div className="mb-4 w-full">
@@ -54,6 +57,8 @@ export function RoleSetupDialog({
               toast({ title: "Failed to update role", description: error.message, variant: "destructive" });
             } else {
               toast({ title: "Role updated", description: `You've set your role to ${selectedRole}.` });
+              setShowConfetti(true);
+              setTimeout(() => setShowConfetti(false), 800);
               await refetchProfile();
             }
             setRoleUpdating(false);
