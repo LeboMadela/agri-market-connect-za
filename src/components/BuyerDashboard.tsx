@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -10,7 +9,6 @@ import { ProduceStats } from "@/components/ProduceStats";
 import { ProduceGallery } from "@/components/ProduceGallery";
 import { ProduceCropsChart } from "@/components/ProduceCropsChart";
 import { useProduceListings, ProduceFilters } from "@/hooks/useProduceListings";
-import ReactQuery from "@tanstack/react-query";
 
 export function BuyerDashboard({
   profile,
